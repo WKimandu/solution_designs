@@ -13,4 +13,164 @@ The goal of the user manual is to allow a team to migrate to a ringfenced networ
 [26-02] Aligned, action points defined, documentation to be delivered
 [13-03] Re-align to discuss the documentation provided (rescheduled due to illness)
 
-what are the asks here?
+
+---
+
+## RINGFENCE DC
+### DC ESG IMPLEMENTATION
+
+- **Date:** 02/03/2025
+- **Author:** William Kimandu
+- **Location:** Campus DC
+- **Version:** 0.1
+
+### Document History
+| Revision Date | Revised By       | Summary of Changes | Version |
+|---------------|------------------|--------------------|---------|
+| 02/03/2025    | Infra ART DC     | Initial draft      | 0.1     |
+
+### Review
+| Name            | Department | Date of Issue | Version |
+|-----------------|------------|---------------|---------|
+| William Kimandu | Campus DC  | 02/03/2025    | 0.1     |
+
+### Contacts
+| Name / Team      | Department / Role | Email |
+|------------------|-------------------|-------|
+| IT OPS           | TCS               |       |
+| IT Campus DC ART | ASML/NTT/TCS      |       |
+
+---
+
+## Contents
+1. Prerequisites
+2. Initial Navigation
+3. ESG Creation
+   - Advanced settings
+   - PCTag: Auto-assign
+4. ESG Selector Configuration
+5. Contract Configuration
+   - Apply to ESG
+6. Verification Steps
+   - Check Endpoint Association
+7. Common ESG Configurations
+8. Troubleshooting
+9. Best Practices
+
+---
+
+## Detailed ESG Configuration Guide in Cisco ACI APIC
+
+### Prerequisites
+- APIC admin access
+- Target tenant permissions
+- Planned ESG structure
+- Identified endpoints and contracts
+
+### Initial Navigation
+1. Launch APIC GUI (https://{APIC-IP})
+2. Login with admin credentials
+3. Navigate: `Tenants > {your-tenant} > Application Profiles`
+
+### ESG Creation
+1. Right-click "Endpoint Security Groups"
+2. Select "Create Endpoint Security Group"
+3. Fill in basic information:
+   - Name: esg-prod-vmware
+   - Description: Production VMware Environment
+   - VRF: {select-appropriate-vrf}
+
+#### Advanced settings
+- Intra ESG isolation: Disabled
+- Preferred Group Member: No
+- PCTag: Auto-assign
+
+### ESG Selector Configuration
+1. In ESG > Selectors tab:
+   - Name: vmware-prod-selector
+   - Match Type: EPG
+   - EPG: epg-3378
+   - Additional Criteria:
+     - MAC: 00:50:56:*
+     - Subnet: 172.31.44.224/28
+
+### Contract Configuration
+1. Create Contract:
+   - Name: prod-to-mgmt
+   - Scope: tenant
+   - Subject: mgmt-access
+   - Filters:
+     - https (TCP/443)
+     - ssh (TCP/22)
+     - snmp (UDP/161)
+2. Apply to ESG:
+   - Provided Contracts tab:
+     - Contract: prod-to-mgmt
+     - Type: provided
+   - Consumed Contracts tab:
+     - Contract: dmz-access
+     - Type: consumed
+
+### Verification Steps
+1. Operational View:
+   - Navigate: Operations > EP Tracker
+   - Filter by:
+     - ESG Name
+     - MAC prefix
+     - IP subnet
+2. Check Endpoint Association:
+   - Navigate: Tenant > Application Profiles > ESGs
+   - Select ESG > Operational tab
+   - Verify:
+     - Endpoint count
+     - Contract status
+     - Policy deployment
+
+### Common ESG Configurations
+- **DMZ ESG**
+- **Management ESG**
+  - Name: esg-mgmt
+  - Selectors:
+    - Match EPG: epg-1751
+    - Type: physical-only
+  - Contracts:
+    - Provided:
+      - mgmt-access
+
+### Troubleshooting
+- **Endpoint not appearing in ESG:**
+  - Verify selector criteria
+  - Check endpoint attributes
+  - Confirm EPG association
+- **Contract issues:**
+  - Verify contract scope
+  - Check filter entries
+  - Confirm provider/consumer relationship
+- **Common commands:**
+  ```bash
+  # Check ESG configuration
+  moquery -c fvESg
+  
+  # Verify endpoint association
+  moquery -c fvCEp -f 'fvCEp.esg=="esg-prod-vmware"'
+  
+  # Check contract deployment
+  moquery -c vzBrCP -f 'vzBrCP.name=="prod-to-mgmt"'
+  ```
+
+### Best Practices
+- **Naming Conventions:**
+  - Use consistent prefixes (esg-, contract-, filter-)
+  - Include environment indicator (prod-, dev-, test-)
+  - Add purpose suffix (-web, -db, -app)
+- **Documentation:**
+  - Document all ESG configurations
+  - Map contract relationships
+  - Keep endpoint inventory updated
+- **Security:**
+  - Follow least-privilege principle
+  - Regular contract audit
+  - Monitor ESG membership changes
+
+---
+
