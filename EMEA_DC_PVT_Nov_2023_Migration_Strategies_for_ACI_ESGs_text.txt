@@ -1,0 +1,3619 @@
+
+• ESG Introduction
+
+• ESG Selectors
+
+• Route Leaking with ESG
+
+• ESG Design Considerations
+
+• Migration Scenario (Demo)
+
+
+Endpoint Security Groups
+What are ESGs?
+
+• Endpoint Security Groups (ESG) are a new network security component in 
+
+Cisco ACI
+• Introduced in ACI 5.0(1) and greatly enhanced in 5.2(1)
+
+• Simplify configuration by decoupling network and security
+
+• Security boundaries are no longer limited to a single BD/EPG association
+
+• No complex configurations for shared service (VRF route leaking)
+
+
+
+Classic EPGs still exist but the goal is to 
+manage securities only via ESGs
+
+Endpoint Security Groups
+Considerations and Benefits
+
+• Security policy now spans BDs (within one VRF)
+
+• Simpler and more flexible than traditional EPGs (no more tight coupling to BD)
+
+
+
+Endpoint Security Groups
+Simple and Flexible Security
+
+• Network Centric
+
+• One subnet is one Security Group
+
+What if we need a more granular 
+security policy ?
+
+
+
+Bridge Domain
+10.0.0.254/24
+
+EPG (VLAN 10)
+
+10.0.0.1
+
+10.0.0.3
+
+10.0.0.2
+
+Endpoint Security Groups
+Simple and Flexible Security
+
+• Network Centric evolution
+
+• Multiple Security Groups in the same subnet
+
+What if endpoints in multiple subnets 
+share the same security policy ?
+
+
+
+Bridge Domain
+10.0.0.254/24
+
+EPG
+(VLAN 11)
+
+EPG
+(VLAN 12)
+
+EPG
+(VLAN 13)
+
+10.0.0.1
+
+10.0.0.3
+
+10.0.0.2
+
+Endpoint Security Groups
+Simple and Flexible Security
+
+• Application Centric
+
+• Security Groups across different subnet
+
+What if sharing the same broadcast 
+domain is a security concern ?
+
+
+
+Bridge Domain
+10.0.0.254/24
+20.0.0.254/24
+
+EPG
+(VLAN 11)
+
+EPG
+(VLAN 12)
+
+10.0.0.1
+
+20.0.0.1
+
+10.0.0.2
+
+Endpoint Security Groups
+Simple and Flexible Security
+
+• Application Centric
+
+• Security Groups across bridge domains
+
+Flexible security grouping
+using Endpoint Security Groups
+
+
+
+BD
+10.0.0.254/24
+
+BD
+20.0.0.254/24
+
+EPG
+(11)
+
+EPG
+(12)
+
+EPG
+(VLAN 20)
+
+10.0.0.1
+
+ESG
+
+20.0.0.1
+
+10.0.0.2
+
+ESG
+
+Endpoint Security Groups
+Considerations and Benefits
+
+• Security policy now spans BDs (within one VRF)
+
+• Simpler and more flexible than traditional EPGs (no more tight coupling to BD)
+
+• More efficient use of TCAM resources
+
+
+
+Endpoint Security Groups
+Efficient TCAM Utilization
+
+VRF A
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+BD 3
+192.168.3.254/24
+
+BD 4
+192.168.4.254/24
+
+EPG 1
+(VLAN 2011)
+
+EPG 2
+(VLAN 2021)
+
+EPG 3
+(VLAN 2031)
+
+EPG 4
+(VLAN 2041)
+
+Web VM 1
+
+Web VM 2
+
+App VM 1
+
+App VM 2
+
+
+
+Requirement
+
+Web VMs
+can talk to
+App VMs
+via
+port X
+
+Endpoint Security Groups
+Efficient TCAM Utilization
+
+VRF A
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+BD 3
+192.168.3.254/24
+
+BD 4
+192.168.4.254/24
+
+EPG 1
+(VLAN 2011)
+
+EPG 2
+(VLAN 2021)
+
+EPG 3
+(VLAN 2031)
+
+EPG 4
+(VLAN 2041)
+
+Web VM 1
+
+Web VM 2
+
+App VM 1
+
+App VM 2
+
+Using EPGs
+
+
+
+Endpoint Security Groups
+Efficient TCAM Utilization
+
+Using EPGs
+
+12 entries (zoning rules)
+
+6 per direction
+
+
+
+EPG 1
+
+EPG 3
+
+Protocol X
+
+Permit
+All
+
+Permit
+All’
+
+EPG 2
+
+EPG 4
+
+Permit All
+
+Protocol X
+
+EPG1 → EPG2
+
+EPG1 → EPG3
+
+Permit All’
+
+EPG3 → EPG4
+
+EPG1 → EPG4
+
+EPG2 → EPG3
+
+EPG2 → EPG4
+
+BD 1192.168.1.254/24Web VM 1VRF AEPG 1(VLAN 2011)BD 2192.168.2.254/24BD 3192.168.3.254/24BD 4192.168.4.254/24Web VM 2EPG 2(VLAN 2021)App VM 1EPG 3(VLAN 2031)App VM 2EPG 4(VLAN 2041)Endpoint Security Groups
+Efficient TCAM Utilization
+
+VRF A
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+BD 3
+192.168.3.254/24
+
+BD 4
+192.168.4.254/24
+
+EPG 1
+(VLAN 2011)
+
+EPG 2
+(VLAN 2021)
+
+EPG 3
+(VLAN 2031)
+
+EPG 4
+(VLAN 2041)
+
+Web VM 1
+
+Web VM 2
+
+App VM 1
+
+App VM 2
+
+ESG web
+
+ESG app
+
+Using ESGs
+
+
+
+Endpoint Security Groups
+Efficient TCAM Utilization
+
+Protocol X
+
+ESG web
+
+ESG app
+
+Protocol X
+
+ESG web → ESG app
+
+Simple and optimized
+
+Using ESGs
+
+2 entries (zoning rules)
+
+1 per direction
+
+
+
+ESG appESG webBD 1192.168.1.254/24Web VM 1VRF AEPG 1(VLAN 2011)BD 2192.168.2.254/24BD 3192.168.3.254/24BD 4192.168.4.254/24Web VM 2EPG 2(VLAN 2021)App VM 1EPG 3(VLAN 2031)App VM 2EPG 4(VLAN 2041)Endpoint Security Groups
+Considerations and Benefits
+
+• Security policy now spans BDs (within one VRF)
+
+• Simpler and more flexible than traditional EPGs (no more tight coupling to BD)
+
+• More efficient use of TCAM resources
+
+• EPG is still used to bind VLANs and interfaces
+
+• No changes in VRF/BD/EPG from network perspective
+
+• ESG contracts and BD subnets are deployed on all nodes where the VRF is deployed
+
+• Route leaking moves up to the VRF level
+
+• No more need for subnets under a provider EPG
+
+• No longer applied via a contract relationship
+
+• Much simpler and intuitive route leaking config
+
+
+
+Segmentation in Cisco ACI
+EPG vs ESG
+
+EPG
+
+vs
+
+ESG
+
+Endpoint Groups
+
+Endpoint Security Groups
+
+Defines both forwarding and segmentation
+
+Defines only security segmentation
+
+Scope bounded to a Bridge Domain
+
+Scope bounded to a VRF
+
+Cannot span more than one Bridge Domain
+
+Can span multiple Bridge Domains
+
+Available since ACI 1.0
+
+Available since ACI 5.0
+
+
+
+ESG Selectors
+
+Associating EP to ESGs
+
+
+
+ESG Selectors
+Supported Selectors 
+
+• Selectors are configured under each ESG with a variety of matching criteria 
+
+to classify endpoints to the ESG.
+
+• Four selectors available:
+
+• IP Subnet Selector – From release 5.0(1)
+
+• Tag Selector – From release 5.2(1)
+
+• EPG Selector – From release 5.2(1)
+
+• Service EPG Selector – From 5.2(4) *
+
+
+
+
+
+IP Subnet Selector
+
+
+
+ESG Selectors
+IP Subnet Selector
+
+• Classifies endpoints to an ESG 
+
+based on IP address
+• Works with both host IP (/32 or /128) 
+
+and subnet (any mask length)
+
+• Only classifies IP address of endpoints
+
+• Hence, only routed traffic is classified
+
+There are workarounds to avoid that 
+L2 traffic bypasses ESG classification
+
+More on this later...
+
+
+
+Tag Selector
+
+
+
+ESG Selectors
+Tag Selector
+
+• Uses policy tags to classify 
+endpoints to a given ESG
+• A policy tag consists of a key and a 
+
+value
+
+• Policy tags can be assigned to a 
+
+variety of user configurable objects
+
+Each object can be matched by only 
+one tag selector at a time.
+
+
+
+To be part of this ESG, an 
+EP just needs to match 
+one of these selectors
+
+ESG Selectors
+Tag Selectors
+
+MAC Address A
+
+MAC Address B
+
+IP Subnet C
+
+MAC Address D
+
+MAC Address E
+
+IP Address F
+
+MAC A, B, IP Subnet C 
+belong to this ESG
+
+ESG DevOps
+Tag Selector
+
+• Key: Owner
+• Operator: equals
+• Value: DevOps
+
+2
+
+MAC D, E, IP address F 
+belong to this ESG
+
+Tag Selector
+
+• Key: Owner
+• Operator: contains
+• Value: HR
+
+ESG HR
+
+Policy Tag
+Owner: DevOps
+
+1
+
+Policy Tag
+Owner: HR1
+
+Policy Tag
+Owner: HR2
+
+1
+
+Attach policy tags to desired objects
+
+2
+
+Use tag selectors under an ESG to match endpoints with the specified tag(s)
+
+
+
+ESG Selectors
+What are Policy Tags?
+
+• Policy Tags are objects (tagTag) that can be attached to ACI configurable 
+
+objects as a label on which APIC can apply some effects
+
+• As of 5.2(1), the following objects are supported for ESG Tag Selectors to 
+
+match based on policy tags:
+
+Type
+
+Description
+
+BD subnet
+
+A subnet configured under a BD
+
+IP address
+
+A metadata to represent an IP address in a VRF
+
+MAC address
+
+A metadata to represent a MAC address in a BD
+
+Object Class
+
+fvSubnet
+
+fvEpIpTag
+
+fvEpMacTag
+fvEpVmmMacTagDef
+
+
+
+Static endpoint
+
+A static endpoint configured under EPGs. Only type silent hosts 
+are supported for ESG tag selector matching.
+
+fvStCEp
+
+
+
+ESG Selectors
+Policy Tags Configuration
+
+Static Endpoint
+
+“Policy Tags” are 
+configured under 
+these objects
+
+BD Subnet
+
+Policy tags (tagTag) and annotations 
+(tagAnnotation) are different
+
+Endpoint Tag (MAC/IP)
+
+Policy tags are not specific for ESGs, 
+but only used by ESGs for now
+
+
+
+ESG Selectors
+Policy Tag Support for ESG
+
+• How do you want to classify your endpoints?
+
+• With a range of IPs:
+
+• Policy tags on BD subnets
+
+• With specific IPs:
+
+• Policy tags on Endpoint IP Tags
+
+• With specific MACs:
+
+• Policy tags on Endpoint MAC tags
+
+• With VMware VM attributes:
+
+• Policy tags on VMM Endpoint MAC tags
+
+• With existing static endpoints:
+
+• Policy tags on existing static endpoints
+
+ESG classification using VMware VM 
+attributes requires VMM integration
+
+Read-only VMM domain not supported. 
+Enhancement being tracked
+
+EPG Selector
+
+
+
+ESG Selectors
+EPG Selector
+
+• An EPG selector matches an 
+
+entire EPG to an ESG
+• Multiple EPGs can be matched to an 
+
+ESG using EPG selectors
+
+• EPGs must be in the same tenant and 
+
+the same VRF as the ESG
+
+EPG Selectors play a critical role in the 
+migration process! 
+
+
+
+ESG Selectors
+EPG Selector
+
+• Why are EPG Selectors so special?
+
+• Because existing contracts under the EPG are inherited by the ESG
+
+EP1, 2 can talk to EP 3, 4 via contract X
+
+EPG A
+
+EP1
+
+EP2
+
+Contract
+X
+
+EPG B
+
+EP3
+
+EP4
+
+EPG A/ESGA
+
+EP1
+
+EP2
+
+Contract
+X
+
+EPG B
+
+EP3
+
+EP4
+
+ESG A
+
+Contract
+Y
+
+ESG B
+
+EP5
+
+
+
+EPG Selector
+EPG A
+
+ESG A
+
+EP1
+
+EP2
+
+Contract
+Y
+
+ESG B
+
+EP5
+
+ESG Selectors
+EPG Selector
+
+• Why are EPG Selectors so special?
+
+EPG Selector “EPG A” on ESG A
+
+• EPG A becomes ESG A from security point of view
+
+• All endpoints from EPG A now belong to ESG A
+
+• ESG A inherits the contracts from EPG A
+
+• Because existing contracts under the EPG are inherited by the ESG
+
+• But no more new contracts can be added on EPG A
+
+EP1, 2 can talk to EP 3, 4 via contract X
+
+EP1, 2 can talk to EP 3, 4 via contract X
+AND
+EP1, 2 can talk to EP 5 via contract Y
+
+EPG A
+
+EP1
+
+EP2
+
+Contract
+X
+
+EPG B
+
+EP3
+
+EP4
+
+EPG A/ESGA
+
+EP1
+
+EP2
+
+Contract
+X
+
+EPG B
+
+EP3
+
+EP4
+
+ESG A
+
+Contract
+Y
+
+ESG B
+
+EP5
+
+
+
+EPG Selector
+EPG A
+
+ESG A
+
+EP1
+
+EP2
+
+Contract
+Y
+
+ESG B
+
+EP5
+
+ESG Selectors
+EPG Selector
+
+• Why are EPG Selectors so special?
+
+• Because existing contracts under the EPG are inherited by the ESG
+
+• Guidelines:
+
+• Multiple EPGs can be mapped to the same ESG
+
+• EPGs must belong to the same tenant as the ESG
+
+• EPGs must belong to the same VRF as the ESG
+
+• No ‘after-the-fact’ security config changes on EPGs matched to an ESG:
+
+• Contracts*
+
+• Preferred Group Membership*
+
+• Intra-EPG Isolations*
+
+
+
+* Those can of course be configured on the ESG
+
+ESG Selectors
+EPG Selector
+
+• Why are EPG Selectors so special?
+
+• Because existing contracts under the EPG are inherited by the ESG
+
+• Guidelines:
+
+• Multiple EPGs can be mapped to the same ESG
+
+• EPGs must belong to the same tenant as the ESG
+
+• EPGs must belong to the same VRF as the ESG
+
+• No ‘after-the-fact’ security config changes on EPGs matched to an ESG:
+
+• Contracts*
+
+• Preferred Group Membership*
+
+• Intra-EPG Isolations*
+
+Always start your migration by migrating EPGs to ESGs using EPG selectors
+
+
+
+* Those can of course be configured on the ESG
+
+Route Leaking with ESG
+
+Route Leaking made easy!
+
+
+
+Route Leaking with ESG
+Decoupling Route Leaking and Contracts
+
+EPG Shared Service
+Semi-automatic via Contract
+
+ESG Shared Service
+Decouple route-leaking & contract
+
+New
+
+VRF A
+
+VRF B
+
+VRF A
+192.168.1.0/24 leak to VRF B
+
+VRF B
+192.168.2.0/24 leak to VRF A
+
+BD 1
+192.168.1.254/24
+
+EPG 1-1
+192.168.1.254/24
+✓ Shared between VRFs
+
+Provider
+
+BD 2
+192.168.2.254/24
+✓ Shared between VRFs
+
+EPG 2-1
+
+Consumer
+
+
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+EPG 1-1
+
+ESG 1
+
+Provider
+
+EPG 2-1
+
+ESG 2
+
+Consumer
+
+Route Leaking with ESG
+Decoupling Route Leaking and Contracts
+
+• Route Leaking not driven anymore by 
+
+contracts
+
+• Decoupling between routing and security
+
+• Only supported for ESG
+
+• For EPG, old method is still required
+
+• Can leak either BD subnet or a subset
+
+• Aggregation or using a superset is not 
+
+supported 
+
+Similar configuration can be used for 
+shared L3Out using ESGs
+
+(Not covered today)
+
+
+
+ESG Shared Service
+Decouple route-leaking & contract
+
+VRF A
+192.168.1.0/24 leak to VRF B
+
+VRF B
+192.168.2.0/24 leak to VRF A
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+EPG 1-1
+
+ESG 1
+
+Provider
+
+EPG 2-1
+
+ESG 2
+
+Consumer
+
+Route Leaking with ESG
+Decoupling Route Leaking and Contracts
+
+No BD/EPG scope required
+Inter-VRF Leaked Routes 
+config takes precedence
+
+VRF A
+192.168.1.0/24 
+leak to VRF B
+
+VRF B
+192.168.2.0/24 
+leak to VRF A
+
+BD 1
+192.168.1.254/24
+
+BD 2
+192.168.2.254/24
+
+EPG 1-1
+
+EPG 2-1
+
+192.168.1.11
+
+192.168.2.11
+
+ESG 1
+
+ESG 2
+
+
+
+If the matching BD subnet 
+exists, it is leaked to the 
+target VRF.
+
+Design Considerations
+
+Guardrails before getting started!
+
+
+
+Design Considerations
+Supported Contract Combinations
+
+Supported
+
+Not Supported
+
+• Contracts between:
+
+○
+○
+○
+○
+○
+
+ESG ⇔ ESG
+ESG ⇔ L3Out ExtEPG
+ESG ⇔ inband-EPG
+ESG ⇔ vzAny
+ESG ⇔ Service EPG (internally created shadow EPG)
+
+• Contracts between:
+ESG ⇔ EPG **
+ESG ⇔ uSeg EPG
+
+○
+○
+
+• Taboo Contracts
+
+• Preferred Group
+•
+Intra-ESG Contract
+• Contract Inheritance
+• Service Graphs & PBR
+
+
+
+** Except using EPG Selector 
+for migration purposes
+
+Any contract features that are supported in uSeg
+EPG are supported in ESG unless it’s explicitly 
+mentioned as not supported on the right
+
+Design Considerations
+Selector Preference
+
+For Switching Traffic
+
+For Routing Traffic
+
+Precedence Order
+
+Selector
+
+Precedence Order
+
+Selector
+
+1
+
+2
+
+3
+
+Tag Selector (Endpoint MAC Tag)
+Tag Selector (Static Endpoint)
+
+Tag Selector (VMM Endpoint MAC Tag)
+
+EPG Selector
+
+An ESG can have many tag selectors 
+associated but only one of those 
+matched tags will apply to a given 
+endpoint based on Precedence
+
+
+
+1
+
+2
+
+3
+
+4
+
+5
+
+Tag Selector (Endpoint IP Tag)
+IP Subnet Selector (host IP)
+
+Tag Selector (BD Subnet)
+IP Subnet Selector (subnet)
+
+Tag Selector (Endpoint MAC Tag)
+Tag Selector (Static Endpoint)
+
+Tag Selector (VMM Endpoint MAC Tag)
+
+EPG Selector
+
+Design Considerations
+Selector Preference
+
+• What if I have two ESG Selectors with same precedence classifying the same endpoint in 
+
+two different ESGs?
+
+Tag Selector
+Owner * Dev
+
+dev-esg
+
+ecommerce-esg
+
+Tag Selector
+App = ecommerce
+
+IP Address A
+
+Policy Tag
+Owner: DevOps
+
+Policy Tag
+App: ecommerce
+
+If same endpoint is matched by two selectors 
+of same precedence, an error will be raised
+
+
+
+Design Considerations
+MAC-based Selectors vs IP-based Selectors
+
+• MAC-Based Selectors
+
+• Tag Selector (Endpoint MAC Tag)
+
+• Tag Selector (Static Endpoint)
+
+• Tag Selector (VMM Endpoint MAC Tag)
+
+• IP-Based Selectors
+
+• Tag Selector (Endpoint IP Tag)
+
+• Tag Selector (BD Subnet)
+
+• IP Subnet Selector
+
+• Others
+
+• EPG Selector
+
+
+
+Recommended to use MAC-Based selectors 
+whenever possible, as they are considered for both 
+switched and routed traffic
+
+Design Considerations
+L2-Traffic Limitation for IP-Based Selectors
+
+• Scenario 1:
+
+• Scenario 3:
+
+• MAC_A is matched by a selector of ESG 1
+
+•
+
+IP_A is _not_ matched by any ESG
+
+• MAC_A is _not_ matched by any ESG
+
+•
+
+IP_A is matched by a selector of ESG 2
+
+• Result:
+
+• Result:
+
+• Both MAC_A and IP_A are classified to ESG 1
+
+• MAC_A is _not_ classified to any ESG, and still 
+
+belongs to the original EPG
+
+•
+
+IP_A is classified to ESG 2
+
+• Scenario 2:
+
+• MAC_A is matched by a selector of ESG 1
+
+•
+
+IP_A is matched by a selector of ESG 2
+
+• Result:
+
+• MAC_A is classified to ESG 1
+
+•
+
+IP_A is classified to ESG 2
+
+
+
+When only IP-based selectors are used, 
+MAC addresses are not classified to ESGs. 
+
+Design Considerations
+L2-Traffic Limitation for IP-Based Selectors
+
+• What’s the impact?
+
+• Switching traffic (i.e., within the same subnet) do not use ESG contracts
+
+• Even if its payload has the IP address classified to an ESG.
+
+• In other words...
+
+• Two IP Endpoints (same subnet, same EPG) are classified to different ESGs
+
+• These two endpoints can still talk freely through the MAC and its original EPG
+
+IP Subnet Selector
+
+This caveat is present with the following selectors and tags:
+•
+• Policy Tag Selector + BD Subnet Policy Tag
+• Policy Tag Selector + Endpoint IP Tag
+
+
+
+Design Considerations
+L2-Traffic Limitation for IP-Based Selectors
+
+• How to fix this?
+
+• Use Proxy ARP (on all original EPGS)
+
+• Proxy ARP makes sure that all traffic from the EPGs will be handled as a routing traffic. 
+
+• This means that all traffic uses the pcTag of IP. It does no longer matter whether the MAC still 
+
+belongs to the original EPG.
+
+• How to enable Proxy ARP?
+
+• Enable Intra-EPG Isolation + Enable Proxy-ARP
+
+• Configure Intra-EPG Contract
+
+• Allow Micro-segmentation for VMM integration
+
+• Enable Flood in Encapsulation
+
+
+
+The option use depends on 
+the use case. 
+
+More information in ESG PIW
+
+Design Considerations
+L2-Traffic Limitation for IP-Based Selectors
+
+• What is the impact of enabling proxy ARP?
+
+• Increase CPU usage due to increase in ARP requests being processed
+
+• ARP requests are punted to CPU, hence being rate-limited by CoPP
+
+• This may impact if several ARP resolution are triggered at the same time
+
+• e.g., after a leaf reboot
+
+
+
+Design Considerations
+VRF, BD or EPG in Common
+
+• What if my design uses the tenant common?
+
+• This may limit the selectors that you can use
+
+Note when VRF and/or BD are in 
+common, you are also able to match 
+endpoints from other tenants using 
+the same VRF and BD
+
+Selectors
+
+Tag Selector (EP MAC)
+
+Tag Selector (EP IP)
+
+Tag Selector (BD Subnet)
+
+Tag Selector (Static EP)
+
+Tag Selector (VMM)
+
+IP Subnet Selector
+
+EPG Selector
+
+VRF 
+in Common
+
+VRF & BD 
+in Common
+
+VRF & BD & EPG
+in Common
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+❌
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+✅
+
+❌
+
+❌
+
+❌
+
+✅
+
+❌
+
+
+
+* This table assumes ESG is configured on a user tenant
+
+Migration Scenario
+
+From zero segmentation to...wherever you want!
+
+
+
+Migration Scenario
+How a typical fabric looks like
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+
+
+Migration Scenario
+How a typical fabric looks like
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+This app profile contains 
+all EPGs within the VRF
+
+Typical network-centric 
+deployment mode where 
+there is a 1: mapping 
+between BD and EPG
+
+
+
+Workloads are distributed 
+as needed, not really a 
+mapping between EPG 
+and business app
+
+Migration Scenario
+How a typical fabric looks like
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+e
+u
+q
+i
+t
+u
+o
+b
+-
+e
+n
+i
+l
+n
+o
+
+r
+g
+m
+-
+y
+r
+o
+t
+n
+e
+v
+n
+i
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+frontend
+
+adservice
+
+recommendation
+
+checkout
+
+email
+
+shipping
+
+payment
+
+product catalog
+
+cart
+
+currency
+
+Redis cache
+
+inv-frontend
+
+inv-backend
+
+task-mgr
+
+
+
+Migration Scenario
+How a typical fabric looks like
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+e
+u
+q
+i
+t
+u
+o
+b
+-
+e
+n
+i
+l
+n
+o
+
+r
+g
+m
+-
+y
+r
+o
+t
+n
+e
+v
+n
+i
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+EPG
+
+192.168.156.0_24
+
+192.168.155.0_24
+
+Workloads are distributed 
+as needed, not really a 
+mapping between EPG 
+and business app
+
+frontend
+
+adservice
+
+recommendation
+
+checkout
+
+email
+
+shipping
+
+payment
+
+product catalog
+
+cart
+
+currency
+
+Redis cache
+
+inv-frontend
+
+inv-backend
+
+task-mgr
+
+How can we provide 
+some level of visibility and 
+segmentation here?
+
+
+
+Migration Scenario
+How a typical fabric looks like
+
+• How does segmentation look like before?
+
+• Typical options:
+
+• Using Preferred Groups
+
+• Using vzAny
+
+Thanks to Preferred Groups, 
+all EPGs can talk to each 
+other with no restrictions
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+prefGrMemb=enabled
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+prefGrMemb=yes
+
+
+
+Migration Scenario
+How a typical fabric looks like
+
+• How does segmentation look like before?
+
+• Typical options:
+
+• Using Preferred Groups
+
+• Using vzAny
+
+Using vzAny we can apply 
+the same contract to all EPGs 
+in the VRF
+
+tn-demo
+
+vrf-01
+
+AP
+
+network-segments
+
+vzAny
+
+All EPGs
+
+C
+
+P
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+Cont
+
+permit-any-any
+
+
+
+Migration Scenario
+Choosing your Segmentation Level
+
+• How much segmentation do we want?
+
+• Single Security Zones per VRF
+
+• Equivalent to Preferred Groups or vzAny
+
+• Multiple Security Zones per VRF
+
+• Think of this like having several Preferred Groups per VRF
+
+• Segmentation per Application
+
+• Segmentation per Application tier/service
+
+• and more...
+
+n
+o
+i
+t
+a
+t
+n
+e
+m
+g
+e
+S
+e
+r
+o
+M
+
+With ESG we can evolve from one model to another 
+without modifying the network constructs
+
+
+
+ 
+Migration Scenario
+Choosing your Segmentation Level
+
+Segmentation
+
+tn-demo
+
+vrf-01
+
+AP
+
+ESG
+
+all-subnets
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+Single Security Zone
+
+192.168.156.0_24
+
+EPG
+
+
+
+Migration Scenario
+Choosing your Segmentation Level
+
+Segmentation
+
+tn-demo
+
+vrf-01
+
+AP
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+Multiple Security Zones
+
+192.168.156.0_24
+
+EPG
+
+ESG
+
+security-group-1
+
+ESG
+
+security-group-2
+
+
+
+Migration Scenario
+Choosing your Segmentation Level
+
+tn-demo
+
+vrf-01
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+Segmentation
+
+192.168.155.0_24
+
+Segmentation per app
+
+192.168.156.0_24
+
+EPG
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+AP
+
+online-boutique-app
+
+ESG
+
+all-services
+
+AP
+
+inventory-mgr-app
+
+ESG
+
+all-services
+
+
+
+Migration Scenario
+Choosing your Segmentation Level
+
+tn-demo
+
+vrf-01
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+Segmentation
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+AP
+
+online-boutique-app
+
+ESG
+
+frontend
+
+192.168.155.0_24
+
+Segmentation per service
+
+192.168.156.0_24
+
+EPG
+
+ESG
+
+adservice
+
+ESG
+
+recommendation
+
+ESG
+
+checkout
+
+ESG
+
+email
+
+ESG
+
+shipping
+
+ESG
+
+payment
+
+ESG
+
+product-catalog
+
+ESG
+
+cart
+
+ESG
+
+currency
+
+ESG
+
+redis-cache
+
+AP
+
+inventory-mgr-app
+
+ESG
+
+inv-frontend
+
+ESG
+
+inv-backend
+
+ESG
+
+task-mgr
+
+
+
+Step 1
+
+
+
+Migration Scenario
+Step 1 – Single ESG for open communication
+
+• Create a new catch-all ESG
+
+• Use EPG selector to group all EPGs under a single ESG
+
+•
+
+Initially, all EPs will be mapped to it
+
+• Progressively, only EP not matched with a more specific rule will remain here
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+ESG
+
+network-segments
+
+C
+
+CCI
+
+I
+
+P
+
+This ESG plays the same role as 
+preferred groups: allow open 
+communication between EPGs
+
+SELECTOR
+
+match EPG 192.168.150.0_24
+match EPG 192.168.151.0_24
+match EPG 192.168.152.0_24
+match EPG 192.168.153.0_24
+match EPG 192.168.154.0_24
+match EPG 192.168.155.0_24
+match EPG 192.168.156.0_24
+
+
+
+Remember that EPG 
+selector is the selector 
+with lower precedence
+
+* Note EPGs are still configured, even if not shown
+
+Migration Scenario
+Step 1 – Single ESG for open communication
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+ESG
+
+network-segments
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+BD
+
+192.168.153.0_24
+
+BD
+
+192.168.154.0_24
+
+BD
+
+192.168.155.0_24
+
+BD
+
+192.168.156.0_24
+
+EPG
+
+192.168.150.0_24
+
+EPG
+
+192.168.151.0_24
+
+EPG
+
+192.168.152.0_24
+
+EPG
+
+192.168.153.0_24
+
+EPG
+
+192.168.154.0_24
+
+EPG
+
+192.168.155.0_24
+
+EPG
+
+192.168.156.0_24
+
+Open communication between 
+all EPGs part of this VRF
+
+
+
+Step 2
+
+
+
+Migration Scenario
+Step 2 – Different ESG for each application 
+
+• Create ANP + ESG for a given application
+
+• Classify endpoints for that application underneath
+
+• Rest of EP will remain in catch-all ESG
+
+• Repeat for each application
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+AP
+
+online-boutique
+
+ESG
+
+ESG
+
+How can we match endpoints 
+that belong to the app?
+
+network-segments
+
+all-services
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+SELECTOR
+
+Allow or restrict 
+communication to endpoints 
+outside the app as needed
+
+vzAny or Preferred Group     
+
+can also be used at this stage
+
+* Note EPGs are still configured, even if not shown
+
+
+
+Migration Scenario
+Step 2 – Mapping EPs to applications
+
+• How to map EP to application ESG?
+
+• Using VMM Endpoint MAC Tags (i.e., vCenter Tags) 
+
+Recommended
+
+• Using Endpoint MAC Tags
+
+• Using Endpoint IP Tags
+
+• Using BD Subnet Tags *
+
+• Using IP Subnet Selector *
+
+* Although it’s possible, it may be unlikely that all endpoints for app are part of a subset of BD subnet.
+Hence, using Endpoint IP Tag is typically a better option.
+
+
+
+Migration Scenario
+Step 2 – Mapping EPs to applications
+
+• How to map EP to application ESG?
+
+• Using VMM Endpoint MAC Tags (i.e., vCenter Tags) 
+
+• Using Endpoint MAC Tags
+
+• Using Endpoint IP Tags
+
+• Using BD Subnet Tags *
+
+• Using IP Subnet Selector *
+
+If planning to use IP-based selectors, remember 
+to enable proxy-arp using intra-ESG contracts 
+before starting the migration
+
+It cannot be done after EPG selector is used
+
+* Although it’s possible, it may be unlikely that all endpoints for app are part of a subset of BD subnet.
+Hence, using Endpoint IP Tag is typically a better option.
+
+
+
+Migration Scenario
+Step 2 – Mapping EPs to applications
+
+• How to map EP to application ESG?
+
+• Using VMM Endpoint MAC Tags (i.e., vCenter Tags) 
+
+Recommended
+
+
+
+Migration Scenario
+Step 2 – Mapping EPs to applications
+
+• How to map EP to application ESG?
+
+• Using VMM Endpoint MAC Tags (i.e., vCenter Tags) 
+
+Recommended
+
+
+
+Migration Scenario
+Step 2 – Mapping EPs to applications
+
+demo
+
+vrf-01
+
+AP
+
+-
+k
+r
+o
+w
+t
+e
+N
+
+s
+t
+n
+e
+m
+g
+e
+s
+
+BD
+
+192.168.150.0_24
+
+BD
+
+192.168.151.0_24
+
+BD
+
+192.168.152.0_24
+
+EPG
+
+192.168.150.0_24
+dynamic (P,S) vlans
+Intra EPG = Unenforced
+
+EPG
+
+192.168.151.0_24
+dynamic (P,S) vlans
+Intra EPG = Unenforced
+
+EPG
+
+192.168.152.0_24
+dynamic (P,S) vlans
+Intra EPG = Unenforced
+
+AP
+
+online-boutique
+
+ESG
+ESG
+
+all-services
+
+C
+
+CCI
+
+I
+
+P
+
+AP
+
+epg-matched-esg
+
+ESG
+
+network-segments
+
+C
+
+CCI
+
+I
+
+P
+
+VDS PG
+
+VDS PG
+
+VDS PG
+
+VDS portgroup name
+192.168.150.0_24
+ Dynamic PVLAN (P,S)
+
+VDS portgroup name
+192.168.151.0_24
+ Dynamic PVLAN (P,S)
+
+VDS portgroup name
+192.168.152.0_24
+ Dynamic PVLAN (P,S)
+
+Note Endpoints are 
+automatically moved, no 
+need to move them to a 
+different port-group 
+
+ESG
+ESG
+
+network-segments
+network-segments
+
+ESG
+
+online-boutique
+
+
+
+ESXi cluster with VMM integration
+
+Migration Scenario
+Step 2 – Different ESG for each application 
+
+• What are the benefits so far?
+
+Endpoint visibility per 
+application
+
+
+
+Understand where app endpoints are 
+connected, including leaf, interface and 
+hosting server (if using VMM)
+
+Step 3
+
+
+
+Migration Scenario
+Step 3 – Communication between applications
+
+• And now, what?
+
+• Now I can apply security policies between different applications
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+AP
+
+online-boutique
+
+AP
+
+inventory-mgr
+
+ESG
+
+ESG
+
+ESG
+
+network-segments
+
+all-services
+
+all-services
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+
+
+* Note EPGs are still configured, even if not shown
+
+Migration Scenario
+Step 3 – Communication between applications
+
+• And now, what?
+
+• Now I can apply security policies between different applications
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+AP
+
+online-boutique
+
+AP
+
+inventory-mgr
+
+ESG
+
+ESG
+
+ESG
+
+network-segments
+
+all-services
+
+all-services
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+PBR
+
+* Note EPGs are still configured, even if not shown
+
+
+
+Migration Scenario
+Step 3 – Communication between applications
+
+• And now, what?
+
+• Or I can get visibility into app flows for ADM
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+AP
+
+online-boutique
+
+AP
+
+inventory-mgr
+
+ESG
+
+ESG
+
+ESG
+
+network-segments
+
+all-services
+
+all-services
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+P
+
+C
+
+Use an intra-esg contract 
+with permit-any and PBR 
+or copy services
+
+PBR
+
+* Note EPGs are still configured, even if not shown
+
+
+
+Migration Scenario
+Step 3 – Communication between applications
+
+• And now, what?
+
+• Now I can apply security policies between different applications
+
+• Or I can get visibility into app flows for ADM
+
+• And I can evolve to a micro-segmentation model
+
+• This can be done for specific applications, at our own pace
+
+• Meanwhile, per-app segmentation and visibility is still there
+
+
+
+Step 4
+
+
+
+Migration Scenario
+Step 4 – Enforce additional application security
+
+tn-demo
+
+vrf-01
+
+AP
+
+online-boutique
+
+ESG
+
+all-services
+
+adservice
+
+recommendation
+
+Consumers
+
+C
+
+CCI
+
+I
+
+P
+
+frontend
+
+checkout
+
+shipping
+
+product catalog
+
+cart
+
+Redis cache
+
+
+
+email
+
+payment
+
+currency
+
+This is what we have so far
+A single security zone for all
+application services
+
+Migration Scenario
+Step 4 – Enforce additional application security
+
+tn-demo
+
+vrf-01
+
+AP
+
+online-boutique
+
+Consumers
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+frontend
+
+checkout
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+Requires application 
+dependency mapping
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+adservice
+
+recommendation
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+payment
+
+email
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+product
+catalogue
+
+C
+
+CCI
+
+I
+
+P
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+redis
+
+C
+
+CCI
+
+I
+
+P
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+CCI
+
+I
+
+P
+
+C
+ESG
+
+cart
+
+shipping
+
+currency
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+
+
+Single security zone for each
+application service
+
+Migration Scenario
+Step 4 – Enforce additional application security
+
+• How to map endpoints to each app service tier?
+
+• Use Tag Selectors as before
+
+• Ensure EP is not being matched to “all-services” ESG anymore
+
+• Remove selectors as migration is being done
+
+• Always keep communication open from app tier to “all-services” until migration is completed
+
+tn-demo
+
+vrf-01
+
+AP
+
+epg-matched-esg
+
+AP
+
+online-boutique
+
+ESG
+
+ESG
+
+ESG
+
+network-segments
+
+all-services
+
+frontend
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+C
+
+CCI
+
+I
+
+P
+
+Keep adding ESGs for the 
+different services / tiers
+
+
+
+permit any
+
+* Note EPGs are still configured, even if not shown
+
+Demo
+
+
+
+
+
+Migration Scenario
+Summary
+
+• Use ESGs to apply your desired security policy
+
+• Use EPGs just to configure forwarding
+
+•
+
+i.e., configure VLAN on a port to connect EPs to a given BD
+
+• You can decide how much you want to segment in a flexible way
+
+• Zone-based Segmentation
+
+• Application-based Segmentation
+
+• Micro-segmentation
+
+• ... or your own way
+
+• Mapping of Endpoints to ESG is done based on policy
+
+• Hence, no need to move EPs to different port-groups or change the VLAN being used
+
+
+
+FAQ
+
+Frequently Asked Questions about ESGs
+
+
+
+Frequently Asked Questions
+ESG
+
+• Can an EPG talk to an ESG if there is a contract between them?
+
+• Generally, no, they can’t
+
+• The only exception is when an ESG uses an EPG selector for migration purposes
+
+• When an EPG is mapped to an ESG, the ESG inherits EPG contracts and hence can talk to EPGs 
+
+based on existing contracts
+
+• However, no new contracts can be added afterwards
+
+EPG Selectors
+
+EPG A1
+
+ESG A1
+
+ESG A1 / EPG A1
+EPG A1
+EPG A2
+EPG A3
+
+
+
+C1
+
+EPG B1
+EPG B2
+EPG B3
+
+C2
+
+EPG C1
+EPG C2
+EPG C3
+
+Frequently Asked Questions
+ESG
+
+• Can an EPG talk to an ESG if there is a contract between them?
+
+• Generally no, they can’t
+
+• The only exception is when an ESG uses an EPG selector for migration purposes
+
+• When an EPG is mapped to an ESG, the ESG inherits EPG contracts and hence can talk to EPGs 
+
+based on existing contracts
+
+• However, no new contracts can be added afterwards
+
+• Can ESGs be used for External Endpoints?
+• No, only internal EPs can be mapped to ESGs
+
+• External EPGs are still used for external destinations
+
+• ESGs can talk to External EPGs as long as a contract exists between them
+
+• Nothing changes here compared to EPGs
+
+
+
+Frequently Asked Questions
+ESG
+
+• Can I use Service Graphs or PBR with ESGs?
+
+• Yes, absolutely
+
+• All Service Graph and PBR features supported for EPGs are supported for ESG except 
+
+explicitly mentioned
+
+• Can I use ESGs if I have Multi-Pod or Remote Leaf?
+
+• Yes, ESG is supported with Multi-Pod, Multi-Tier and Remote Leaf
+
+• Can I use ESGs if I have Multi-Site?
+• No, ESG is not supported in Multi-Site yet
+
+• Support is expected around 2HCY24
+
+
+
+Frequently Asked Questions
+ESG
+
+• Can I use AND operations with ESG selectors?
+
+• No, ESG selectors are always combined using OR operation
+
+• In other words, only one of the selectors need to match for EP to be part of ESG
+
+• What if I already have contracts between EPG?
+
+• In that case, migrate away from EPG into ESG as follows:
+
+1. Create one ESG per EPG you have (1:1 mapping)
+
+2. Use EPG selector to map EPG to ESG
+
+3. Replicate EPG contracts with ESGs (need new contracts)
+
+4. Remove EPG contracts when done
+
+• After that, you can evolve your ESG segmentation as you wish
+
+
+
+Frequently Asked Questions
+ESG
+
+• Is ESG supported on Nexus Dashboard Insights?
+
+• No, ESG is not supported in Insights yet
+
+• Support will be added around 2HCY24
+
+
+
+Want to know more?
+
+Check this PIW
+
+ACI ESGs, new options 
+for ACI segmentation and 
+Route Leaking
+
+
+
+Want to know more?
+
+Check also this      
+Design Guide
+
+Cisco ACI Endpoint Security 
+Group (ESG) Design Guide
+
+
+
+
